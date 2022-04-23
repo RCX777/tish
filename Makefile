@@ -23,6 +23,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 clean:
 	@echo " Cleaning..."; 
 	@echo " $(RM) -r $(BUILDDIR) $(TARGET) $(JUNK)"; $(RM) -r $(BUILDDIR) $(TARGET) $(JUNK)
+	@clear
 
 valgrind: $(TARGET)
 	@valgrind --leak-check=full $(TARGET)

@@ -9,7 +9,7 @@
 dll_t* dll_create(void)
 {
     dll_t* dll = malloc(sizeof(dll_t));
-    dll->null  = malloc(sizeof(lnode));
+    dll->null  = calloc(1, sizeof(lnode));
     dll->head  = dll->null;
     dll->tail  = dll->null;
     dll->size  = 0;
@@ -163,7 +163,7 @@ void dll_delete_nth_item(dll_t* dll, size_t pos)
 
 void dll_insert_nth_item(dll_t* dll, size_t pos, Item item)
 {
-    if (!dll && pos > 1)
+    if (!dll && pos != 1)
         return;
     
     if (!dll || dll->size == 0) {
@@ -173,10 +173,12 @@ void dll_insert_nth_item(dll_t* dll, size_t pos, Item item)
     
     if (pos == dll->size + 1) {
         dll_insert_last(dll, item);
+        return;
     }
     
-    if (pos == 0) {
+    if (pos == 1) {
         dll_insert_first(dll, item);
+        return;
     }
     
     lnode* iter;
@@ -195,6 +197,7 @@ void dll_insert_nth_item(dll_t* dll, size_t pos, Item item)
     iter->prev = new;
     new->next = iter;
 
+    new->item = item;
     (dll->size)++;
 }
 
@@ -226,4 +229,18 @@ void dll_print(dll_t* dll)
 
     for (iter = dll->head, idx = 0; idx < dll->size; iter = iter->next, idx++)
         putchar(iter->item);
+}
+
+void dll_print_ascii(dll_t* dll)
+{
+    if (!dll || dll->size == 0)
+        return NULL;
+
+    lnode* iter;
+    size_t idx;
+
+    for (iter = dll->head, idx = 0; idx < dll->size; iter = iter->next, idx++)
+        printf("%d ", iter->item);
+    
+    printf("\n");
 }

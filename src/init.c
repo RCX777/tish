@@ -11,7 +11,7 @@ void init_shell(settings_t** settings, cqu_t** history)
     *settings = get_settings();
 
     // Initializes the command history queue
-    *history  = cqu_create((*settings)->histsize, &dll_destroy);
+    *history  = cqu_create((*settings)->init->histsize, &dll_destroy);
 
     // Clear the screen and print initial message
     clrscr();

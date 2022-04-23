@@ -5,6 +5,7 @@
 typedef struct termios termios_t;
 typedef struct init_fields {
     char*        message;
+    size_t       histsize;
 }   init_fields;
 
 typedef struct settings {
@@ -12,7 +13,6 @@ typedef struct settings {
     termios_t*   _os_new;
     termios_t*   _os_old;
     char*        prompt;
-    size_t       histsize;
 }   settings_t;
 
 settings_t* get_settings(void);

@@ -38,3 +38,5 @@ void dll_insert_nth_item(dll_t* dll, size_t pos, Item item);
 void dll_destroy(dll_t* dll);
 
 void dll_print(dll_t* dll);
+
+void dll_print_ascii(dll_t* dll);

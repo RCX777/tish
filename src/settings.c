@@ -219,7 +219,7 @@ settings_t* get_settings(void)
     settings->_os_old    = malloc(sizeof(termios_t));
     settings->_os_new    = malloc(sizeof(termios_t));
     settings->init       = malloc(sizeof(init_fields));
-    settings->histsize   = DEFAULT_HISTSIZE;
+    settings->init->histsize = DEFAULT_HISTSIZE;
     settings->prompt     = NULL;
 
     // Read config file
@@ -247,7 +247,7 @@ settings_t* get_settings(void)
             set_init_message(settings, buffer);
             break;
         case histsize:
-            fscanf(fp, "%zu", &(settings->histsize));
+            fscanf(fp, "%zu", &(settings->init->histsize));
             break;
         default:
             if (buffer[0] == '[')
