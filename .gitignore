@@ -10,3 +10,6 @@ lib/*
 
 # junk from during development
 *.config
+
+# valgrind stuff
+*vgcore.*

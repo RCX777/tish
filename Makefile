@@ -9,7 +9,7 @@ CFLAGS := -g # -fsanitize=address
 LIB := -L lib
 INC := -I include
 
-JUNK := tish.config
+JUNK := tish.config $(wildcard *vgcore.*)
 
 $(TARGET): $(OBJECTS)
 	@echo " Linking..."

@@ -88,12 +88,13 @@ static void config_error(FILE* fp, settings_t* settings, char* buffer)
 }
 
 /* Converts a prompt format from config into the actual prompt to be printed */
-static void set_prompt(settings_t* settings, char* format)
+char* update_prompt(settings_t* settings)
 {
-    settings->prompt    = malloc(sizeof(char) * BUFSIZE);
-    settings->prompt[0] = '\0';
+    char* prompt_copy = strdup(settings->prompt);
+    char* output      = malloc(sizeof(char) * BUFSIZE);
+    output[0] = '\0';
 
-    char* saveptr = format;
+    char* saveptr = prompt_copy;
     char* token;
 
     bool set_color_flag = false;
@@ -110,39 +111,44 @@ static void set_prompt(settings_t* settings, char* format)
             if (set_color_flag) // Don't do anything if color is already set
                 continue;
 
-            set_str_color(settings->prompt, token + sizeof((char) '^'));
+            set_str_color(output, token + sizeof((char) '^'));
             set_color_flag = true;
             continue;
         // Special tokens
         case '*':
             if (!strcmp(token + sizeof((char) '*'), "user")) {
-                strcat(settings->prompt, getenv("USER"));
+                strcat(output, getenv("USER"));
 
             } else if (!strcmp(token + sizeof((char) '*'), "host")) {
-                gethostname(settings->prompt + strlen(settings->prompt), HOSTNAMESIZE);
+                gethostname(output + strlen(output), HOSTNAMESIZE);
 
             } else if (!strcmp(token + sizeof((char) '*'), "path")) {
                 char* path = getcwd(NULL, PATHSIZE);
-                strcat(settings->prompt, path);
+                strcat(output, path);
                 free(path);
 
             } else {
-                strcat(settings->prompt, token);
+                strcat(output, token);
             }
             break;
         // Ordinary characters
         default:
-            strcat(settings->prompt, token);
+            strcat(output, token);
         }
 
         if (set_color_flag) {
-            RESET_STR_COLOR(settings->prompt);
+            RESET_STR_COLOR(output);
             set_color_flag = false;
         }
     }
+
+    free(prompt_copy);
+
+    return output;
 }
 
-void set_init_message(settings_t* settings, char* message)
+/* Sets the shell prompt using the message given in the config */
+static void set_init_message(settings_t* settings, char* message)
 {
     settings->init->message    = malloc(sizeof(char) * BUFSIZE);
     settings->init->message[0] = '\0';
@@ -171,6 +177,25 @@ void set_init_message(settings_t* settings, char* message)
     strcat(settings->init->message, "\n\n");
 }
 
+/* Sets the echoing feature of UNIX I/O using termios */
+void set_io_echo_mode(settings_t* settings, int echo)
+{
+    tcgetattr(STDIN_FILENO, settings->_os_old);
+    settings->_os_new = settings->_os_old;
+
+    // Disable buffered I/O and set ECHO mode
+    settings->_os_new->c_lflag &= ~ICANON;
+    settings->_os_new->c_lflag &= echo ? ECHO : ~ECHO;
+
+    tcsetattr(STDIN_FILENO, TCSANOW, settings->_os_new);
+}
+
+/* Resets I/O settings to old value */
+void reset_io_settings(settings_t* settings)
+{
+    tcsetattr(STDIN_FILENO, TCSANOW, settings->_os_old);
+}
+
 /* Reads the configuration file and populates a settings_t structure. If no configuration
  * file is present, then it is created with default settings, or if the configuration is
  * not correct, then the shell is terminated.*/
@@ -191,8 +216,11 @@ settings_t* get_settings(void)
     settings_t* settings = malloc(sizeof(settings_t));
     char*       buffer   = malloc(BUFSIZE * sizeof(char));
 
+    settings->_os_old    = malloc(sizeof(termios_t));
+    settings->_os_new    = malloc(sizeof(termios_t));
     settings->init       = malloc(sizeof(init_fields));
     settings->histsize   = DEFAULT_HISTSIZE;
+    settings->prompt     = NULL;
 
     // Read config file
     while (fscanf(fp, SAFE_STR_FORMAT, buffer) != EOF) {
@@ -211,8 +239,8 @@ settings_t* get_settings(void)
 
         switch (switch_arg) {
         case prompt:
-            fscanf(fp, SAFE_STR_FORMAT, buffer);
-            set_prompt(settings, buffer);
+            settings->prompt = malloc(sizeof(char) * BUFSIZE);
+            fscanf(fp, SAFE_STR_FORMAT, settings->prompt);
             break;
         case init_message:
             fscanf(fp, "%[^\n]\n", buffer);
@@ -238,11 +266,16 @@ void clean_junk_after_init(settings_t* settings)
     free(settings->init->message);
     free(settings->init);
 
+    if (!settings->prompt)
+        return;
+
     settings->prompt = realloc(settings->prompt, strlen(settings->prompt) + sizeof((char) '\0'));
 }
 
 void clean_settings(settings_t* settings)
 {
     free(settings->prompt);
+    free(settings->_os_old);
+    free(settings->_os_new);
     free(settings);
 }
