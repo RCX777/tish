@@ -1,35 +1,43 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
 
-#include "../include/settings.h"
-#include "../include/dllist.h"
-#include "../include/input.h"
+#include <input.h>
+#include <dllist.h>
 
-#define BUFSIZE 1024
-
-char* getinput(settings_t* settings)
+void trim_leading_space(dll_t* line)
 {
-    char* prompt = update_prompt(settings);
+    if (!line || !(line->size))
+        return;
+    
+    while ((line->head->item) == ' ' && (line->size))
+        dll_delete_first(line);
+}
+
+void getinput(settings_t* settings, cqu_t* history)
+{
+    // Display the prompt
+    char*  prompt = update_prompt(settings);
     printf("%s", prompt);
 
-    dll_t* dll = dll_create();
+    ssize_t linecursor = 0;
+    dll_t*  line = dll_create();
+    int     ch   = 0;
 
+    // Disables echoing done by the OS
     // set_io_echo_mode(settings, false);
 
-    int ch = 0;
+    while ((ch = getchar()) != EOF && ch != '\n') {
+        // Handle special characters
+        // BIG TODO
 
-    while (ch != '\n')
-    {
-        ch = getchar();
-        dll_insert_last(dll, ch);
+        dll_insert_last(line, ch);
     }
 
-    char* str = dll_to_str(dll);
+    trim_leading_space(line);
 
+    if (line->size != 0)
+        cqu_enqueue(history, line);
+    else
+        dll_destroy(line);
+    
     // reset_io_settings(settings);
-
-    free(prompt);
-
-    return str;
 }

@@ -1,7 +1,7 @@
-#include "../include/colors.h"
-
 #include <stdio.h>
 #include <string.h>
+
+#include <colors.h>
 
 enum enumcolors {
     reset,

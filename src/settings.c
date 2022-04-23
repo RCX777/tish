@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-#include "../include/settings.h"
-#include "../include/colors.h"
+#include <settings.h>
+#include <colors.h>
 
 #define HOSTNAMESIZE      256
 #define PATHSIZE          512

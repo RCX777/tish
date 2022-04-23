@@ -2,17 +2,20 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "../include/settings.h"
-#include "../include/init.h"
-#include "../include/input.h"
+typedef int Item;
+
+#include <input.h>
+#include <init.h>
+
+typedef cqu_t history_t;
 
 int main(int argc __attribute__((unused)), char** argv)
 {
    // Initialize shell
-   settings_t* settings;
-   char*       command;
+   settings_t* settings = NULL;
+   history_t*  history  = NULL;
 
-   init_shell(&settings);
+   init_shell(&settings, &history);
 
    // for debugging some stuff
    // printf("HISTSIZE = %zu\n\n", settings->histsize);
@@ -23,10 +26,6 @@ int main(int argc __attribute__((unused)), char** argv)
 
    // TODO (run command loop) 
    for (;;) {
-      command = getinput(settings);
-
-      system(command); // TODO: replace this
-
-      free(command);
+      getinput(settings, history);
    }
 }

@@ -1,5 +1,6 @@
 #pragma once
 
-#include "../include/settings.h"
+#include <settings.h>
+#include <cqueue.h>
 
-void init_shell(settings_t** settings);
+void init_shell(settings_t** settings, cqu_t** history);

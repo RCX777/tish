@@ -1,3 +1,6 @@
 #pragma once
 
-char* getinput(settings_t* settings);
+#include <settings.h>
+#include <cqueue.h>
+
+void getinput(settings_t* settings, cqu_t* history);
