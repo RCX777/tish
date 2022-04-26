@@ -2,4 +2,4 @@
 
 #include <settings.h>
 
-void init_shell(void);
+extern settings_t settings;

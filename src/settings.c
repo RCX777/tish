@@ -7,199 +7,107 @@
 
 #include <settings.h>
 #include <colors.h>
-
-#define HOSTNAMESIZE      256
-#define PATHSIZE          512
-
-#define BUFSIZE           2048
-#define SAFE_STR_FORMAT "%2047s"
+#include "../include/error.h"
 
 #define CONFIG_PATH "/home/rcx/Projects/tish/tish.config"
 
-#define DEFAULT_PROMPT "^BLUE-*user-@-^BLUE-*host-:-^CYAN-*path-^BLUE-_>>_"
+#define DEFAULT_PROMPT       ANSI_BLUE"\\u"ANSI_RESCLR"@"ANSI_BLUE"\\h"ANSI_RESCLR":"ANSI_YELLOW"\\w"ANSI_RESCLR"\\$ "
+#define DEFAULT_INIT_MESSAGE "Welcome to "ANSI_BLUE"tish"ANSI_RESCLR", The Tiny Shell for Linux!\\n\\n"
+#define DEFAULT_HISTSIZE     64
 
-#define DEFAULT_HISTSIZE 32
+#define DEFAULT_PROMPTSIZE   512
 
 #define DEFAULT_CONFIG \
 "\n\
-# Default config for tish. Items must be encased in square brackets, followed\n\
-# by a whitespace and the setting.\n\
+# Config file for tish. Correct syntax for setting options is:\n\
+# option = value\n\
 \n\
-# Prompt syntax: separate each token with dashes, set text color with '^WHITE',\n\
-# '^BLUE', etc for the next token. You can also print the current user, hostname\n\
-# or directory path with '*user', '*host' or '*path'. Use underscores instead of spaces\n\n\
-[Prompt] "DEFAULT_PROMPT"\n\
+# Prompt option: Sets the prompt, displaying things such as the current user,\n\
+# the hostname of the machine, the current path, etc. Syntax is identical to the\n\
+# PS1 environment variable used by GNU bash\n\n\
+Prompt = "DEFAULT_PROMPT"\n\
 \n\
-# InitMessage: Changes the text displayed on shell initialization. If you want to\n\
-# remove this, you can set the value to NoDisplay. You can also set colors!\n\n\
-[InitMessage] Welcome to ^BLUE tish, The Tiny Shell for Linux!\n\
+# InitMessage: Changes the text displayed on shell initialization.\n\
+# You can also set colors, with ANSI escape sequences. For newlines use \\n.\n\n\
+InitMessage = Welcome to "ANSI_BLUE"tish"ANSI_RESCLR", The Tiny Shell for Linux!\\n\\n\n\
 \n\
 # CommandHistorySize: Sets a limit for the number of commands to be stored in the history.\n\n\
-[CommandHistorySize] 64\n\
+CommandHistorySize = 64\n\
 "
 
-enum enumsettings {
+settings_t settings;
+
+enum options {
     prompt,
     histsize,
     init_message,
 };
 
-static const char* setting_list[] = {
-    [prompt]       = "[Prompt]",
-    [histsize]     = "[CommandHistorySize]",
-    [init_message] = "[InitMessage]"
+static const char* option_list[] = {
+    [prompt]       = "Prompt",
+    [histsize]     = "CommandHistorySize",
+    [init_message] = "InitMessage"
 };
 
-static size_t num_of_settings = sizeof(setting_list) / sizeof(char*);
-
+static size_t num_of_options = sizeof(option_list) / sizeof(char*);
 
 /* Creates a default configuration file */
 static void create_default_cfg(void)
 {
-    printf("Cannot find configuration file! Creating default at %s ...\n", CONFIG_PATH);
-
     FILE* fp = fopen(CONFIG_PATH, "w");
 
-    if (!fp) {
-        SET_RED();
-        perror("fopen() failed!");
-        fprintf(stderr, "Failure! Could not create a default configuration! Terminating shell...\n");
-        RESET_COLOR();
-        exit(errno);
-    }
+    ERR_FOPEN(fp, ERR_CONFIG_CREATE);
 
     fprintf(fp, "%s", DEFAULT_CONFIG);
 
     fclose(fp);
-
-    printf("Done!\n");
-}
-
-/* Handles errors while interpreting the configuration file */
-static void config_error(FILE* fp, settings_t* settings, char* buffer)
-{
-    SET_RED();
-    printf("Terminating shell...\n");
-    RESET_COLOR();
-    free(settings);
-    free(buffer);
-    fclose(fp);
-    exit(EXIT_FAILURE);
-}
-
-/* Converts a prompt format from config into the actual prompt to be printed */
-char* update_prompt(settings_t* settings)
-{
-    char* prompt_copy = strdup(settings->prompt);
-    char* output      = malloc(sizeof(char) * BUFSIZE);
-    output[0] = '\0';
-
-    char* saveptr = prompt_copy;
-    char* token;
-
-    bool set_color_flag = false;
-
-    while ((token = strtok_r(saveptr, "-", &saveptr))) {
-        // Convert underscores to whitespaces
-        for (size_t index = 0; index < strlen(token); index++)
-            if (token[index] == '_')
-                token[index]  = ' ';
-
-        switch (token[0]) {
-        // Colors
-        case '^':
-            if (set_color_flag) // Don't do anything if color is already set
-                continue;
-
-            set_str_color(output, token + sizeof((char) '^'));
-            set_color_flag = true;
-            continue;
-        // Special tokens
-        case '*':
-            if (!strcmp(token + sizeof((char) '*'), "user")) {
-                strcat(output, getenv("USER"));
-
-            } else if (!strcmp(token + sizeof((char) '*'), "host")) {
-                gethostname(output + strlen(output), HOSTNAMESIZE);
-
-            } else if (!strcmp(token + sizeof((char) '*'), "path")) {
-                char* path = getcwd(NULL, PATHSIZE);
-                strcat(output, path);
-                free(path);
-
-            } else {
-                strcat(output, token);
-            }
-            break;
-        // Ordinary characters
-        default:
-            strcat(output, token);
-        }
-
-        if (set_color_flag) {
-            RESET_STR_COLOR(output);
-            set_color_flag = false;
-        }
-    }
-
-    free(prompt_copy);
-
-    return output;
-}
-
-/* Sets the shell prompt using the message given in the config */
-static void set_init_message(settings_t* settings, char* message)
-{
-    settings->init->message    = malloc(sizeof(char) * BUFSIZE);
-    settings->init->message[0] = '\0';
-
-    char* saveptr = message;
-    char* token;
-
-    bool set_color_flag = false;
-
-    while ((token = strtok_r(saveptr, " ", &saveptr))) {
-        if (token[0] == '^') {
-            set_str_color(settings->init->message, token + sizeof((char) '^'));
-            set_color_flag = true;
-            continue;
-        }
-
-        strcat(settings->init->message, token);
-        strcat(settings->init->message, " ");
-
-        if (set_color_flag) {
-            RESET_STR_COLOR(settings->init->message);
-            set_color_flag = false;
-        }
-    }
-
-    strcat(settings->init->message, "\n\n");
 }
 
 /* Sets the echoing feature of UNIX I/O using termios */
-void set_io_echo_mode(settings_t* settings, int echo)
+void set_io_echo_mode(int echo)
 {
-    tcgetattr(STDIN_FILENO, settings->_os_old);
-    settings->_os_new = settings->_os_old;
+    tcgetattr(STDIN_FILENO, settings._os_old);
+    settings._os_new = settings._os_old;
 
     // Disable buffered I/O and set ECHO mode
-    settings->_os_new->c_lflag &= ~ICANON;
-    settings->_os_new->c_lflag &= echo ? ECHO : ~ECHO;
+    settings._os_new->c_lflag &= ~ICANON;
+    settings._os_new->c_lflag &= echo ? ECHO : ~ECHO;
 
-    tcsetattr(STDIN_FILENO, TCSANOW, settings->_os_new);
+    tcsetattr(STDIN_FILENO, TCSANOW, settings._os_new);
 }
 
 /* Resets I/O settings to old value */
-void reset_io_settings(settings_t* settings)
+void reset_io_settings()
 {
-    tcsetattr(STDIN_FILENO, TCSANOW, settings->_os_old);
+    tcsetattr(STDIN_FILENO, TCSANOW, settings._os_old);
+}
+
+static bool is_comment(const char* __restrict__ line)
+{
+    for (size_t idx = 0; line[idx]; idx++) {
+        if (line[idx] == '#')
+            return true;
+        
+        if (line[idx] != '#' && line[idx] != ' ' && line[idx] != '\n')
+            return false;
+    }
+}
+
+static char* trim_leading_spaces(char* buffer)
+{
+    size_t idx = 0;
+
+    for (idx = 0; buffer[idx] == ' ' || buffer[idx] == '\n'; idx++)
+        if (!buffer[idx])
+            return NULL;
+    
+    return (buffer + idx);
 }
 
 /* Reads the configuration file and populates a settings_t structure. If no configuration
  * file is present, then it is created with default settings, or if the configuration is
  * not correct, then the shell is terminated.*/
-settings_t* get_settings(void)
+void get_settings(void)
 {
     // Test if config file exists, if not then create a default configuration
     if (access(CONFIG_PATH, F_OK))
@@ -207,75 +115,88 @@ settings_t* get_settings(void)
     
     FILE* fp = fopen(CONFIG_PATH, "r");
 
-    if (!fp) {
-        perror("fopen() failed!");
-        fprintf(stderr, "Failure! Could not open the configuration file! Terminating shell...\n");
-        exit(errno);
-    }
+    ERR_FOPEN(fp, ERR_CONFIG_OPEN);
 
-    settings_t* settings = malloc(sizeof(settings_t));
-    char*       buffer   = malloc(BUFSIZE * sizeof(char));
+    settings._os_old = malloc(sizeof(termios_t));
+    settings._os_new = malloc(sizeof(termios_t));
+    settings.init    = calloc(1, sizeof(init_fields));
+    settings.prompt  = malloc(DEFAULT_PROMPTSIZE * sizeof(char));
+    settings.init->histsize = DEFAULT_HISTSIZE;
 
-    settings->_os_old    = malloc(sizeof(termios_t));
-    settings->_os_new    = malloc(sizeof(termios_t));
-    settings->init       = malloc(sizeof(init_fields));
-    settings->init->histsize = DEFAULT_HISTSIZE;
-    settings->prompt     = NULL;
+    char*  buffer = NULL;
+    size_t bufsiz = 0;
 
-    // Read config file
-    while (fscanf(fp, SAFE_STR_FORMAT, buffer) != EOF) {
-        // Skip comment
-        if (buffer[0] == '#') {
-            fscanf(fp, "%*[^\n]\n");
+    while (!feof(fp)) {
+        if (!getline(&buffer, &bufsiz, fp))
             continue;
-        }
+        
+        char* line = trim_leading_spaces(buffer);
+
+        if (!line || !*line || is_comment(line))
+            continue;
+
 
         size_t switch_arg = -1;
 
-        for (size_t index = 0; index < num_of_settings; index++) {
-            if (!strcmp(buffer, setting_list[index]))
-                switch_arg = index;
+        for (size_t idx = 0; idx < num_of_options; idx++)
+            if (strstr(line, option_list[idx]) == line) {
+                switch_arg = idx;
+                line += strlen(option_list[idx]);
+                break;
+            }
+        
+        line = trim_leading_spaces(line);
+
+        if (!(line = strchr(line, '='))) {
+            printf(ANSI_RED"Syntax error! No equal sign found!\n");
+            printf("Terminating shell...\n"ANSI_RESCLR);
+            exit(EXIT_FAILURE);
         }
 
+        line = trim_leading_spaces(++line);
+
+        line[strcspn(line, "\n")] = 0;
+
+        if (!*line)
+            continue;
+
+        // printf("%s", line);
+        
         switch (switch_arg) {
         case prompt:
-            settings->prompt = malloc(sizeof(char) * BUFSIZE);
-            fscanf(fp, SAFE_STR_FORMAT, settings->prompt);
-            break;
-        case init_message:
-            fscanf(fp, "%[^\n]\n", buffer);
-            set_init_message(settings, buffer);
+            strcpy(settings.prompt, line);
             break;
         case histsize:
-            fscanf(fp, "%zu", &(settings->init->histsize));
+            // TODO
+            break;
+        case init_message:
+            settings.init->message = malloc(sizeof(char) * BUFSIZ);
+            strcpy(settings.init->message, line);
             break;
         default:
-            if (buffer[0] == '[')
-                printf("Unknown setting: '%s'\n", buffer);
+            printf(ANSI_RED"Unknown option!\n");
+            printf("Terminating shell...\n"ANSI_RESCLR);
+            exit(EXIT_FAILURE);
         }
     }
 
     free(buffer);
-    fclose(fp);
-
-    return settings;
 }
 
-void clean_junk_after_init(settings_t* settings)
+void clean_junk_after_init(void)
 {
-    free(settings->init->message);
-    free(settings->init);
+    free(settings.init->message);
+    free(settings.init);
 
-    if (!settings->prompt)
+    if (!settings.prompt)
         return;
 
-    settings->prompt = realloc(settings->prompt, strlen(settings->prompt) + sizeof((char) '\0'));
+    settings.prompt = realloc(settings.prompt, strlen(settings.prompt) + 1);
 }
 
-void clean_settings(settings_t* settings)
+void clean_settings(void)
 {
-    free(settings->prompt);
-    free(settings->_os_old);
-    free(settings->_os_new);
-    free(settings);
+    free(settings.prompt);
+    free(settings._os_old);
+    free(settings._os_new);
 }

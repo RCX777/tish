@@ -201,40 +201,55 @@ void dll_insert_nth_item(dll_t* dll, size_t pos, Item item)
     (dll->size)++;
 }
 
-void dll_destroy(dll_t* dll)
+void dll_destroy(dll_t** dll)
 {
-    if (!dll)
+    if (!(*dll))
         return;
     
-    lnode* iter = dll->head;
+    lnode* iter = (*dll)->head;
     lnode* temp;
 
-    while (iter != dll->null) {
+    while (iter != (*dll)->null) {
         temp = iter;
         iter = iter->next;
         free(temp);
     }
 
-    free(dll->null);
-    free(dll);
+    free((*dll)->null);
+    free((*dll));
+    *dll = NULL;
+}
+
+void dllcat(dll_t* dest, dll_t* src)
+{
+    if (!src || !dest || src->size == 0)
+        return;
+
+    lnode* iter;
+    size_t idx;
+
+    for (iter = src->head, idx = 0; idx < src->size && iter; iter = iter->next, idx++)
+        dll_insert_last(dest, iter->item);
+    
+    dest->size += src->size;
 }
 
 void dll_print(dll_t* dll)
 {
     if (!dll || dll->size == 0)
-        return NULL;
+        return;
 
     lnode* iter;
     size_t idx;
 
-    for (iter = dll->head, idx = 0; idx < dll->size; iter = iter->next, idx++)
+    for (iter = dll->head, idx = 0; idx < dll->size && iter; iter = iter->next, idx++)
         putchar(iter->item);
 }
 
 void dll_print_ascii(dll_t* dll)
 {
     if (!dll || dll->size == 0)
-        return NULL;
+        return;
 
     lnode* iter;
     size_t idx;
