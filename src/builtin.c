@@ -9,6 +9,9 @@
 #include "builtin.h"
 
 
+#define  MAX_DIR_LEN 512
+
+
 enum builtin_idx {
     _exit_,
     cd,
