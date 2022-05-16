@@ -1,3 +1,3 @@
-#pragma once
+// Prompt is provided by the Starship Cross-Shell Prompt
 
-void print_prompt(void);
+char* get_prompt(void);

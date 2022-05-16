@@ -1,5 +1,5 @@
-#pragma once
+// Responsible for getting the inputs and storing the command history
 
-#include <settings.h>
+#include <stdbool.h>
 
-void getinput(void);
+bool get_input(char* input);
