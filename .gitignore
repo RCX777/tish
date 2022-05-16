@@ -13,3 +13,6 @@ lib/*
 
 # valgrind stuff
 *vgcore.*
+
+# gdb stuff
+*.gdb*

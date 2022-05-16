@@ -1,6 +1,5 @@
-#pragma once
+// Responsible for getting the inputs and storing the command history
 
-#include <settings.h>
-#include <cqueue.h>
+#include <stdbool.h>
 
-void getinput(settings_t* settings, cqu_t* history);
+bool get_input(char* input);
