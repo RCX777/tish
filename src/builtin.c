@@ -65,14 +65,25 @@ void cmd_cd(char** args)
         return;
     }
 
-    if (!strcmp(args[1], "~")) {
+    if (!args[1]) {
         chdir(getenv("HOME"));
         return;
     }
 
-    if (chdir(args[1]) == -1)
+    char directory[MAX_DIR_LEN];
+
+    *directory = 0;
+
+    if (strchr(args[1], '~') == args[1]) {
+        strcpy(directory, getenv("HOME"));
+        args[1]++;
+    }
+
+    strcat(directory, args[1]);
+
+    if (chdir(directory) == -1)
         fprintf(stderr, RED"cd: The directory %s does not exist!\n"RES,
-                args[1]);
+                directory);
 }
 
 void cmd_help(char** args)
