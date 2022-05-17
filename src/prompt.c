@@ -7,7 +7,7 @@
 #include "colors.h"
 
 
-#define MAX_PROMPT_SIZE 512
+#define MAX_PROMPT_SIZE 256
 
 
 char* get_prompt(void)
@@ -25,7 +25,7 @@ char* get_prompt(void)
     int         ch;
 
     // Store the prompt in a static variable
-    while (((ch = fgetc(fp)) != EOF) && idx < MAX_PROMPT_SIZE)
+    while (((ch = fgetc(fp)) != EOF) && idx < MAX_PROMPT_SIZE - 1)
         prompt[idx++] = (char) ch;
     
     prompt[idx] = '\0';

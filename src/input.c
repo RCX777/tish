@@ -23,7 +23,7 @@ bool get_input(char* input)
         return EXIT_SUCCESS;
     }
 
+    // Should only be reached in case of an empty line
     free(buffer);
-
     return EXIT_FAILURE;
 }

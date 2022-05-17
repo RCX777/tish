@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 
 #include "utils.h"
@@ -34,8 +35,32 @@ int main (int UNUSED argc, char** UNUSED argv)
 
     int   exec_flag;
 
-    // init_shell()
+    // Execute program argument if given
+    if (argc > 1 && !strcmp(argv[1], "-c")) {
+        char command[INPUT_MAX_SIZE];
+        *command = 0;
 
+        int  idx;
+
+        for (idx = 2; idx < argc; idx++) {
+            strcat(command, argv[idx]);
+            strcat(command, " ");
+        }
+
+        exec_flag = process_input(command, args, args_piped);
+
+        if (exec_flag == NOT_PIPED) {
+            // exec args
+        }
+        
+        if (exec_flag == PIPED) {
+            // exec piped args
+        }
+
+        return EXIT_SUCCESS;
+    }
+
+    // Main command loop
     for (;;) {
         if (get_input(input))
             continue;

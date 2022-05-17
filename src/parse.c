@@ -20,12 +20,8 @@ static void parse_delims(char* input, char** args)
 
     args[0] = strmbtok(input, " ", "\"", "\"");
 
-    // printf("args[0] = %s\n", args[0]);
-
     while (args[idx]) {
         args[++idx] = strmbtok(NULL, " ", "\"", "\"");
-
-        // printf("args[%zu] = %s\n", idx, args[idx]);
 
         // Do not store empty tokens into @args
         if (args[idx] && !*args[idx])
@@ -59,8 +55,19 @@ static int parse_pipe(char* input, char** cmdpiped)
         return 0;
 }
 
+static void clear_args(char** args)
+{
+    size_t idx;
+
+    for (idx = 0; idx < MAX_ARGS && args[idx]; idx++)
+        args[idx] = NULL;
+}
+
 int process_input(char* input, char** args, char** args_piped)
 {
+    clear_args(args);
+    clear_args(args_piped);
+
     char* cmdpiped[2];
 
     int   piped = parse_pipe(input, cmdpiped);

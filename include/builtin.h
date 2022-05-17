@@ -6,8 +6,10 @@
 
 bool builtin_handler(char** args);
 
-void cmd_exit(char** args);
+void builtin_cmd_exit(char** args);
 
-void cmd_cd(char** args);
+void builtin_cmd_cd(char** args);
 
-void cmd_help(char** args);
+void builtin_cmd_help(char** args);
+
+void builtin_cmd_clear(char** args);

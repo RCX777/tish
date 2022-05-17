@@ -6,8 +6,8 @@
 #include <unistd.h>
 
 #include "colors.h"
+#include "utils.h"
 #include "builtin.h"
-
 
 #define  MAX_DIR_LEN 512
 
@@ -15,19 +15,22 @@
 enum builtin_idx {
     _exit_,
     cd,
-    help
+    help,
+    clear
 };
 
 static char* builtin_fname[] = {
     [_exit_] = "exit",
     [cd]     = "cd",
-    [help]   = "help"
+    [help]   = "help",
+    [clear]  = "clear"
 };
 
 static void (*builtin_func[])(char**) = {
-    [_exit_] = cmd_exit,
-    [cd]     = cmd_cd,
-    [help]   = cmd_help
+    [_exit_] = builtin_cmd_exit,
+    [cd]     = builtin_cmd_cd,
+    [help]   = builtin_cmd_help,
+    [clear]  = builtin_cmd_clear
 };
 
 static size_t builtin_nmemb = sizeof(builtin_fname) / sizeof(char*);
@@ -49,7 +52,7 @@ bool builtin_handler(char** args)
 }
 
 
-void cmd_exit(char** args)
+void builtin_cmd_exit(char** args)
 {
     if (args[1]) {
         fprintf(stderr, RED"exit: Too many arguments!\n"RES);
@@ -60,7 +63,7 @@ void cmd_exit(char** args)
     exit(EXIT_SUCCESS);
 }
 
-void cmd_cd(char** args)
+void builtin_cmd_cd(char** args)
 {
     if (args[2]) {
         fprintf(stderr, RED"cd: Too many arguments!\n"RES);
@@ -89,7 +92,33 @@ void cmd_cd(char** args)
                 directory);
 }
 
-void cmd_help(char** args)
+void builtin_cmd_clear(char** args)
 {
+    if (args[2]) {
+        fprintf(stderr, RED"clear: Too many arguments!\n"RES);
+        printf("\n"YEL"(Type 'help clear' for related documentation)"RES"\n");
+        return;
+    }
 
+    // Clears screen while preserving the scrollback buffer 
+    if (args[1]) {
+        if (!strcmp(args[1], "-x")) {
+            printf("\e[1;1H\e[2J");
+            return;
+        } else {
+            fprintf(stderr, RED"clear: Invalid flag!\n\n"RES);
+            printf(YEL"(Type 'help clear' for related documentation)"RES"\n");
+            return;
+        }
+    }
+
+    // Clears screen without preserving the scrollback buffer
+    printf("\033c");
+
+
+}
+
+void builtin_cmd_help(char** UNUSED args)
+{
+    // TODO
 }
