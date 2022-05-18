@@ -1,5 +1,7 @@
 // Parses input into arguments and executes built-in commands
 
+#pragma once
+
 
 #define   MAX_ARGS         64
 

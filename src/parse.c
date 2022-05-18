@@ -49,6 +49,10 @@ static int parse_pipe(char* input, char** cmdpiped)
     cmdpiped[0] = strtok_r(rest, "|", &rest);
     cmdpiped[1] = strtok_r(rest, "|", &rest);
 
+    // Should include this later in strmbtok()
+    cmdpiped[0] = skip_trailing_delims(cmdpiped[0], ' ');
+    cmdpiped[1] = skip_trailing_delims(cmdpiped[1], ' ');
+
     if (cmdpiped[1])
         return 1;
     else

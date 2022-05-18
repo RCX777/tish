@@ -1,5 +1,7 @@
 // Handling of built-in commands
 
+#pragma once
+
 
 #include <stdbool.h>
 

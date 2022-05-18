@@ -19,7 +19,6 @@
  * -c
  * ls -alh
  */
-
 char *strmbtok (char *input, char *delim, char *openblock, char *closeblock)
 {
     static char *token = NULL;
@@ -69,7 +68,8 @@ char *strmbtok (char *input, char *delim, char *openblock, char *closeblock)
 }
 
 /* Returns the number of occurences of 'ch' in 'str'. If this number is greater
- * than 'max_occ', then the counting stops and -1 is returned */
+ * than 'max_occ', then the counting stops and -1 is returned
+ */
 int strcount_s(char* str, char ch, size_t max_occ)
 {
     size_t occ = 0;
@@ -84,4 +84,15 @@ int strcount_s(char* str, char ch, size_t max_occ)
     }
 
     return occ;
+}
+
+/* Returns the address at which the first character different from a delim is
+ * found. 
+ */
+char* skip_trailing_delims(char* str, char delim)
+{
+    while (str && *str == delim)
+        str++;
+
+    return str;
 }

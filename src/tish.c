@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include "utils.h"
 #include "input.h"
 #include "parse.h"
+#include "exec.h"
 
 #define   INPUT_MAX_SIZE 1024
 
@@ -49,13 +50,11 @@ int main (int UNUSED argc, char** UNUSED argv)
 
         exec_flag = process_input(command, args, args_piped);
 
-        if (exec_flag == NOT_PIPED) {
-            // exec args
-        }
+        if (exec_flag == NOT_PIPED)
+            exec_args(args);
         
-        if (exec_flag == PIPED) {
-            // exec piped args
-        }
+        if (exec_flag == PIPED)
+            exec_args_piped(args, args_piped);
 
         return EXIT_SUCCESS;
     }
@@ -73,13 +72,11 @@ int main (int UNUSED argc, char** UNUSED argv)
          */
         exec_flag = process_input(input, args, args_piped);
 
-        if (exec_flag == NOT_PIPED) {
-            // exec args
-        }
-        
-        if (exec_flag == PIPED) {
-            // exec piped args
-        }
+        if (exec_flag == NOT_PIPED)
+            exec_args(args);
+
+        if (exec_flag == PIPED)
+            exec_args_piped(args, args_piped);
     }
 
     // This point should never be reached
