@@ -68,7 +68,8 @@ char *strmbtok (char *input, char *delim, char *openblock, char *closeblock)
 }
 
 /* Returns the number of occurences of 'ch' in 'str'. If this number is greater
- * than 'max_occ', then the counting stops and -1 is returned
+ * than 'max_occ', then the counting stops and -1 is returned. To ignore the
+ * rule of 'max_occ', you can pass '0' instead.
  */
 int strcount_s(char* str, char ch, size_t max_occ)
 {
@@ -79,7 +80,7 @@ int strcount_s(char* str, char ch, size_t max_occ)
         if (str[idx] == ch)
             occ++;
         
-        if (occ > max_occ)
+        if (max_occ && occ > max_occ)
             return -1;
     }
 

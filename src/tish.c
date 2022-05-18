@@ -25,11 +25,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include "input.h"
 #include "parse.h"
 #include "exec.h"
+#include "sighandle.h"
+
 
 #define   INPUT_MAX_SIZE 1024
 
+
 int main (int UNUSED argc, char** UNUSED argv)
 {
+    sig_handler(); // Initialize signal handling
+
     char  input[INPUT_MAX_SIZE];
     char* args_piped[MAX_ARGS];
     char* args[MAX_ARGS];

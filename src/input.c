@@ -7,16 +7,20 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#include "input.h"
+#include "utils.h"
 #include "prompt.h"
+#include "input.h"
+
 
 bool get_input(char* input)
 {
     char* buffer = readline(get_prompt());
 
-    if (strlen(buffer)) {
-        add_history(buffer);
-        strcpy(input, buffer);
+    char* line   = skip_trailing_delims(buffer, ' ');
+
+    if (line && strlen(line)) {
+        add_history(line);
+        strcpy(input, line);
 
         free(buffer);
 
