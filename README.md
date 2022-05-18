@@ -27,13 +27,13 @@ chmod +x ./unninstall.sh
 ./unninstall.sh
 ```
 #### **Note!**
-There are **no guarantees** for this to compile and **run properly** on your machine. It also *shouldn't* do any damage, but use at your own risk.
+There are **no guarantees** for this to compile and **run properly** on your machine. It also *shouldn't* do any damage but still, use this shell at your own risk. 😘
 
 ## Running tish
 Once installed, run <code>tish</code> from your current shell to try tish out!
 
 ### Dependencies
-- readline and <code>starship</code> (for the prompt)
+- **readline** and <code>starship</code> (for the prompt)
 - some common *nix system utilities (currently <code>mktemp</code>), in addition to the basic POSIX utilities (<code>cat</code>, <code>cut</code>, <code>dirname</code>, <code>ls</code>, <code>mkdir</code>, <code>mkfifo</code>, <code>rm</code>, <code>sort</code>, <code>tee</code>, <code>tr</code>, <code>uname</code> and <code>sed</code> at least, but the full **coreutils** plus <code>find</code> and <code>awk</code> is preferred)
 ## Current features
 - A runtime command history (empty commands don't get stored)
