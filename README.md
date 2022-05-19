@@ -5,8 +5,8 @@ to [GNU Bash](https://www.gnu.org/software/bash/), but currently lacking a lot
 of features like an actual syntax for running more complex commands or scripts.
 
 #### **Important disclaimer!**
-I built this for a project at my university and I do not know if I will *really* keep developing this, so don't really take this seriously :) . Still,
-please leave some feedback on this as it would help me a lot.
+I built this for a project at my university and I do not know if I will *really* keep developing this, so don't take this very seriously. Still,
+please leave some feedback on this as it would help me a lot. :)
 
 #### **Note!**
 If you want to try this out you need to have [GNU Readline](https://tiswww.case.edu/php/chet/readline/rltop.html) and [Starship](https://starship.rs/)

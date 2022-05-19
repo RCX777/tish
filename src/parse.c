@@ -40,7 +40,7 @@ static int parse_pipe(char* input, char** cmdpiped)
 {
     if (strcount_s(input, '|', 1) == -1) {
         fprintf(stderr,
-                RED"Too many pipe symbols! Allowed maximum is 2!\n"RES);
+                RED"Too many pipe symbols! Allowed maximum is 1!\n"RES);
         return -1;
     }
 
