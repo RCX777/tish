@@ -1,5 +1,5 @@
 # Ignore executables
-.bin/*
+bin/run
 
 # Ignore build and lib directories
 build/*
