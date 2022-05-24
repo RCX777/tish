@@ -1,7 +1,7 @@
 # Include the bin directory
 !bin
 
-# Ignore executables
+# Ignore run
 bin/run
 
 # Ignore build and lib directories

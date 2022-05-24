@@ -26,6 +26,7 @@ build: $(TARGET)
 
 $(TARGET): $(OBJECTS)
 	@printf "$(PRINT_LINK)"
+	@mkdir -p $(@D)
 	@printf "$(ARROW) $(CC) $^ -o \e[0;32m$(TARGET)\e[0m $(LIB)\n"; \
 	                  $(CC) $^ -o         $(TARGET)      $(LIB) -O3 -fsanitize=address
 	@printf "\e[1;32m==>\e[0m \e[1;36mDone!\e[0m\n\n"
