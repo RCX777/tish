@@ -17,6 +17,7 @@ up and chose to use **readline** as even <code>bash</code> uses it, and Starship
 Install the shell with:
 ```
 git clone https://github.com/RCX777/tish
+cd ./tish
 chmod +x ./install.sh
 ./install.sh
 ```
